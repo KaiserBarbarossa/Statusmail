@@ -58,6 +58,3 @@ MAILTEXT
 
 #Mail versenden
 mail -s "Serverstatus" $MAIL < $TEMP
-
-#Temporaere Datei löschen
-rm $TEMP
