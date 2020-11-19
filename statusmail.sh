@@ -2,6 +2,7 @@
 
 ###############################################################
 # (c) 2020 tuxifreund - https://ubuntuusers.de/user/tuxifreund
+# s. https://github.com/KaiserBarbarossa/Statusmail
 # und folgenden Code anpassen in die /etc/crontab eintragen:
 # @hourly   root  cd /PFAD/ZUM/SKRIPT && bash statusmail.sh
 ###############################################################
