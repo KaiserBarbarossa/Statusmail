@@ -1,50 +1,61 @@
 #!/bin/bash
 
-if [ $(id -u) -ne 0 ]; then
- echo "Skript muss als Root gestartet werden"
- exit 1
-fi
+###############################################################
+# (c) 2020 tuxifreund - https://ubuntuusers.de/user/tuxifreund
+# s. https://github.com/KaiserBarbarossa/Statusmail
+# und folgenden Code anpassen in die /etc/crontab eintragen:
+# @hourly   root  cd /PFAD/ZUM/SKRIPT && bash statusmail.sh
+###############################################################
 
-#Grundkonfiguration
-TEMP="PFAD/ZUR/TEMPORÄREN/DATEI"
-MAIL="E-MAIL-ADRESSE"
-SUBJECT="Serverstatus"
+#Grundkonfiguration - bitte anpassen!
+MAIL="E-MAIL-ADRESSE" #E-Mail-Adresse des Empfängers
+
+TEMP=$(mktemp)
+trap 'rm -f "$TEMP"' 0
 
 #Mailtext
+
 date > $TEMP
 hostname >> $TEMP
 uname -a >> $TEMP
-echo "" >> $TEMP
-echo "Sensoren:" >> $TEMP
-echo "" >> $TEMP
-sensors >> $TEMP
-echo "-----" >> $TEMP
-echo "" >> $TEMP
-echo "Festplattenspeicher" >> $TEMP
-df -h >> $TEMP
-echo "-----" >> $TEMP
-echo "" >> $TEMP
-echo "Uptime" >> $TEMP
-uptime >> $TEMP
-echo "-----" >> $TEMP
-echo "" >> $TEMP
-echo "Status Webserver" >> $TEMP
-systemctl status apache2 >> $TEMP
-echo "-----" >> $TEMP
-echo "Status Mailserver" >> $TEMP
-systemctl status postfix >> $TEMP
-echo "" >> $TEMP
-echo "IP-Addresse" >> $TEMP
-ip addr >> $TEMP
-echo "-----" >> $TEMP
-echo "" >> $TEMP
-echo "Netzwerkerreichberkeit" >> $TEMP
-ping -c 2 startpage.com >> $TEMP
-echo "-----" >> $TEMP
-echo "" >> $TEMP
+cat <<MAILTEXT >> "$TEMP"
+
+Sensoren
+
+$(sensors)
+
+-----
+
+Festplattenspeicher
+
+$(df -h)
+
+-----
+
+Uptime
+
+$(uptime)
+
+-----
+
+Status Webserver
+
+$(systemctl status apache2)
+
+Status Postfix
+
+$(systemctl status postfix)
+
+IP-Adresse
+
+$(ip addr)
+
+-----
+
+Netzwerkerreichbarkeit
+
+$(ping -c 2 startpage.com)
+MAILTEXT
 
 #Mail versenden
-mail -s $SUBJECT $MAIL < $TEMP
-
-#Temporaere Datei löschen
-rm $TEMP
+mail -s "Serverstatus" $MAIL < $TEMP
